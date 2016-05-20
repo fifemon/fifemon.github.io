@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+
+	<title>Probes - Fifemon</title>
+
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="..">Fifemon</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="..">Home</a>
+                    </li>
+                
+                
+                
+                    <li class="active">
+                        <a href="./">Probes</a>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../grafana/">Grafana Dashboards</a>
+                    </li>
+                
+                
+                
+                    <li >
+                        <a href="../screenshots/">Screenshots</a>
+                    </li>
+                
+                
+                </ul>
+            
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                
+                    <li >
+                        <a rel="next" href="..">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../grafana/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a href="https://github.com/fifemon">
+                            
+                                <i class="fa fa-github"></i>
+                            
+                            GitHub
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#fifemon">Fifemon</a></li>
+        
+            <li><a href="#requirements">Requirements</a></li>
+        
+            <li><a href="#installation">Installation</a></li>
+        
+            <li><a href="#configuration">Configuration</a></li>
+        
+            <li><a href="#running">Running</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="fifemon">Fifemon</h1>
+<p>Collect HTCondor statistics and report into time-series database. All modules 
+support Graphite, and there is some support for InfluxDB.</p>
+<p>Additionally report select job and slot Classads into Elasticsearch via Logstash.</p>
+<p>Note: this is a fork of the scripts used for monitoring the HTCondor pools
+at Fermilab, and while generally intended to be "generic" for any pool still 
+may require some tweaking to work well for your pool.</p>
+<p>Copyright Fermi National Accelerator Laboratory (FNAL/Fermilab). See LICENSE.txt.</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li>Python 2.6 or greater recommended.</li>
+<li>HTCondor libraries and Python bindings<ul>
+<li>https://research.cs.wisc.edu/htcondor/downloads/</li>
+</ul>
+</li>
+<li>A running Graphite server (available in EPEL or via PIP) <ul>
+<li>http://graphite.readthedocs.org/en/latest/</li>
+</ul>
+</li>
+</ul>
+<p>For current job and slot state:</p>
+<ul>
+<li>A running Elasticsearch cluster<ul>
+<li>https://www.elastic.co/products/elasticsearch</li>
+</ul>
+</li>
+<li>Logstash (tested with v2.0.0+)<ul>
+<li>https://www.elastic.co/downloads/logstash</li>
+</ul>
+</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p>Assuming HTCondor and Python virtualenv packages are already installed:</p>
+<pre><code>cd $INSTALLDIR
+git clone https://github.com/fifemon/probes
+cd probes
+virtualenv --system-site-packages venv
+source venv/bin/activate
+pip install supervisor influxdb
+</code></pre>
+<p>Optionally, for crash mails:</p>
+<pre><code>pip install superlance
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<h3 id="condor-metrics-probe">Condor metrics probe</h3>
+<p>Example probe config is in <code>etc/condor-probe.cfg</code>:</p>
+<pre><code>[probe]
+interval = 240   # how often to send data in seconds
+retries = 10     # how many times to retry condor queries
+delay = 30       # seconds to wait beteeen retries
+test = false     # if true, data is output to stdout and not sent downstream
+once = false     # run one time and exit, i.e. for running wtih cron (not recommended)
+
+[graphite]
+enable = true                           # enable output to graphite
+host = localhost                        # graphite host
+port = 2004                             # graphite pickle port
+namespace = clusters.mypool             # base namespace for metrics
+meta_namespace = probes.condor-mypool   # namespace for probe metrics
+
+[influxdb]
+enable = false       # enable output to influxdb (not fully supported)
+host = localhost     # influxdb host
+port = 8086          # influxdb api port
+db = test            # influxdb database
+tags = foo:bar       # extra tags to include with all metrics (comma-separated key:value)
+
+[condor]
+pool = localhost            # condor pool (collector) to query
+post_pool_status = true     # collect basic daemon metrics
+post_pool_slots = true      # collect slot metrics
+post_pool_glideins = false  # collect glidein-specific metrics
+post_pool_prio = false      # collect user priorities
+post_pool_jobs = false      # collect job metrics
+use_gsi_auth = false        # set true if collector requires authentication
+X509_USER_CERT = ""         # location of X.509 certificate to authenticate to condor with
+X509_USER_KEY = ""          # private key
+</code></pre>
+<h3 id="supervisor">Supervisor</h3>
+<p>Example supervisor config is in <code>etc/supervisord.conf</code>, it can be used as-is for
+basic usage. Reuqires some modification to enable crashmails or to report 
+job and slot details to elsaticsearch (via logstash). </p>
+<h3 id="job-and-slot-state">Job and slot state</h3>
+<p>The scripts that collect raw job and slot records into elasticsearch are much simpler than the metrics 
+probe - simply point at your pool with --pool and JSON records are output to stdout. We use logstash 
+to pipe the output to Elasticsearch; see <code>etc/logstash-fifemon.conf</code>.</p>
+<h2 id="running">Running</h2>
+<p>Using uspervisor:</p>
+<pre><code>cd $INSTALLDIR/probes
+source venv/bin/activate
+</code></pre>
+<p>If using influxdb:</p>
+<pre><code>export INFLUXDB_USERNAME=&lt;username&gt;
+export INFLUXDB_PASSWORD=&lt;password&gt;
+</code></pre>
+<p>Start supervisor:</p>
+<pre><code>supervisord
+</code></pre></div>
+            
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            
+                <p>Copyright 2016 Fermi National Accelerator Laboratory (Fermilab)</p>
+            
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script>var base_url = '..';</script>
+        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
+        <script src="../js/base.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            From here you can search these documents. Enter
+                            your search terms below.
+                        </p>
+                        <form role="form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                            </div>
+                        </form>
+                        <div id="mkdocs-search-results"></div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

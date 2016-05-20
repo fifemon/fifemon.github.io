@@ -1,0 +1,99 @@
+{
+    "docs": [
+        {
+            "location": "/", 
+            "text": "Fifemon\n\n\n\n\n\"There's a dashboard for that!\" (TM)\n\n\n\n\nFifemon is the FIFE project monitoring system developed and operated\nby the User Support for Distrubuted Computing group at Fermilab.\nPrimarily this is monitoring the HTCondor pools, data handling and storage \nsystems, and other related systems.\n\n\nFor an overview of Fifemon and many screenshots of the full deployment at Fermilab\nplease see \nKevin Retzke's talk from HTCondor Week \n2016\n.\n\n\nWe have made the generic probe scripts and generalized dashboards available for use\nby the HEP, Open Science Grid, and wider HTCondor community on \nGitHub\n.\nScripts and dashboards are released only as time and effort permits on an 'as available' basis, \nand we look to the community for help in improving and expanding the application for general use.\n\n\nQuestions, comments, and open discussion are encouraged and should be directed to the fifemon@fnal.gov email list. \nYou may subscribe to this list by sending an email with \nSUBSCRIBE FIFEMON \nyour name\n in the body to listserv@fnal.gov.", 
+            "title": "Home"
+        }, 
+        {
+            "location": "/#fifemon", 
+            "text": "\"There's a dashboard for that!\" (TM)   Fifemon is the FIFE project monitoring system developed and operated\nby the User Support for Distrubuted Computing group at Fermilab.\nPrimarily this is monitoring the HTCondor pools, data handling and storage \nsystems, and other related systems.  For an overview of Fifemon and many screenshots of the full deployment at Fermilab\nplease see  Kevin Retzke's talk from HTCondor Week \n2016 .  We have made the generic probe scripts and generalized dashboards available for use\nby the HEP, Open Science Grid, and wider HTCondor community on  GitHub .\nScripts and dashboards are released only as time and effort permits on an 'as available' basis, \nand we look to the community for help in improving and expanding the application for general use.  Questions, comments, and open discussion are encouraged and should be directed to the fifemon@fnal.gov email list. \nYou may subscribe to this list by sending an email with  SUBSCRIBE FIFEMON  your name  in the body to listserv@fnal.gov.", 
+            "title": "Fifemon"
+        }, 
+        {
+            "location": "/probes/", 
+            "text": "Fifemon\n\n\nCollect HTCondor statistics and report into time-series database. All modules \nsupport Graphite, and there is some support for InfluxDB.\n\n\nAdditionally report select job and slot Classads into Elasticsearch via Logstash.\n\n\nNote: this is a fork of the scripts used for monitoring the HTCondor pools\nat Fermilab, and while generally intended to be \"generic\" for any pool still \nmay require some tweaking to work well for your pool.\n\n\nCopyright Fermi National Accelerator Laboratory (FNAL/Fermilab). See LICENSE.txt.\n\n\nRequirements\n\n\n\n\nPython 2.6 or greater recommended.\n\n\nHTCondor libraries and Python bindings\n\n\nhttps://research.cs.wisc.edu/htcondor/downloads/\n\n\n\n\n\n\nA running Graphite server (available in EPEL or via PIP) \n\n\nhttp://graphite.readthedocs.org/en/latest/\n\n\n\n\n\n\n\n\nFor current job and slot state:\n\n\n\n\nA running Elasticsearch cluster\n\n\nhttps://www.elastic.co/products/elasticsearch\n\n\n\n\n\n\nLogstash (tested with v2.0.0+)\n\n\nhttps://www.elastic.co/downloads/logstash\n\n\n\n\n\n\n\n\nInstallation\n\n\nAssuming HTCondor and Python virtualenv packages are already installed:\n\n\ncd $INSTALLDIR\ngit clone https://github.com/fifemon/probes\ncd probes\nvirtualenv --system-site-packages venv\nsource venv/bin/activate\npip install supervisor influxdb\n\n\n\nOptionally, for crash mails:\n\n\npip install superlance\n\n\n\nConfiguration\n\n\nCondor metrics probe\n\n\nExample probe config is in \netc/condor-probe.cfg\n:\n\n\n[probe]\ninterval = 240   # how often to send data in seconds\nretries = 10     # how many times to retry condor queries\ndelay = 30       # seconds to wait beteeen retries\ntest = false     # if true, data is output to stdout and not sent downstream\nonce = false     # run one time and exit, i.e. for running wtih cron (not recommended)\n\n[graphite]\nenable = true                           # enable output to graphite\nhost = localhost                        # graphite host\nport = 2004                             # graphite pickle port\nnamespace = clusters.mypool             # base namespace for metrics\nmeta_namespace = probes.condor-mypool   # namespace for probe metrics\n\n[influxdb]\nenable = false       # enable output to influxdb (not fully supported)\nhost = localhost     # influxdb host\nport = 8086          # influxdb api port\ndb = test            # influxdb database\ntags = foo:bar       # extra tags to include with all metrics (comma-separated key:value)\n\n[condor]\npool = localhost            # condor pool (collector) to query\npost_pool_status = true     # collect basic daemon metrics\npost_pool_slots = true      # collect slot metrics\npost_pool_glideins = false  # collect glidein-specific metrics\npost_pool_prio = false      # collect user priorities\npost_pool_jobs = false      # collect job metrics\nuse_gsi_auth = false        # set true if collector requires authentication\nX509_USER_CERT = \"\"         # location of X.509 certificate to authenticate to condor with\nX509_USER_KEY = \"\"          # private key\n\n\n\nSupervisor\n\n\nExample supervisor config is in \netc/supervisord.conf\n, it can be used as-is for\nbasic usage. Reuqires some modification to enable crashmails or to report \njob and slot details to elsaticsearch (via logstash). \n\n\nJob and slot state\n\n\nThe scripts that collect raw job and slot records into elasticsearch are much simpler than the metrics \nprobe - simply point at your pool with --pool and JSON records are output to stdout. We use logstash \nto pipe the output to Elasticsearch; see \netc/logstash-fifemon.conf\n.\n\n\nRunning\n\n\nUsing uspervisor:\n\n\ncd $INSTALLDIR/probes\nsource venv/bin/activate\n\n\n\nIf using influxdb:\n\n\nexport INFLUXDB_USERNAME=\nusername\n\nexport INFLUXDB_PASSWORD=\npassword\n\n\n\n\nStart supervisor:\n\n\nsupervisord", 
+            "title": "Probes"
+        }, 
+        {
+            "location": "/probes/#fifemon", 
+            "text": "Collect HTCondor statistics and report into time-series database. All modules \nsupport Graphite, and there is some support for InfluxDB.  Additionally report select job and slot Classads into Elasticsearch via Logstash.  Note: this is a fork of the scripts used for monitoring the HTCondor pools\nat Fermilab, and while generally intended to be \"generic\" for any pool still \nmay require some tweaking to work well for your pool.  Copyright Fermi National Accelerator Laboratory (FNAL/Fermilab). See LICENSE.txt.", 
+            "title": "Fifemon"
+        }, 
+        {
+            "location": "/probes/#requirements", 
+            "text": "Python 2.6 or greater recommended.  HTCondor libraries and Python bindings  https://research.cs.wisc.edu/htcondor/downloads/    A running Graphite server (available in EPEL or via PIP)   http://graphite.readthedocs.org/en/latest/     For current job and slot state:   A running Elasticsearch cluster  https://www.elastic.co/products/elasticsearch    Logstash (tested with v2.0.0+)  https://www.elastic.co/downloads/logstash", 
+            "title": "Requirements"
+        }, 
+        {
+            "location": "/probes/#installation", 
+            "text": "Assuming HTCondor and Python virtualenv packages are already installed:  cd $INSTALLDIR\ngit clone https://github.com/fifemon/probes\ncd probes\nvirtualenv --system-site-packages venv\nsource venv/bin/activate\npip install supervisor influxdb  Optionally, for crash mails:  pip install superlance", 
+            "title": "Installation"
+        }, 
+        {
+            "location": "/probes/#configuration", 
+            "text": "", 
+            "title": "Configuration"
+        }, 
+        {
+            "location": "/probes/#condor-metrics-probe", 
+            "text": "Example probe config is in  etc/condor-probe.cfg :  [probe]\ninterval = 240   # how often to send data in seconds\nretries = 10     # how many times to retry condor queries\ndelay = 30       # seconds to wait beteeen retries\ntest = false     # if true, data is output to stdout and not sent downstream\nonce = false     # run one time and exit, i.e. for running wtih cron (not recommended)\n\n[graphite]\nenable = true                           # enable output to graphite\nhost = localhost                        # graphite host\nport = 2004                             # graphite pickle port\nnamespace = clusters.mypool             # base namespace for metrics\nmeta_namespace = probes.condor-mypool   # namespace for probe metrics\n\n[influxdb]\nenable = false       # enable output to influxdb (not fully supported)\nhost = localhost     # influxdb host\nport = 8086          # influxdb api port\ndb = test            # influxdb database\ntags = foo:bar       # extra tags to include with all metrics (comma-separated key:value)\n\n[condor]\npool = localhost            # condor pool (collector) to query\npost_pool_status = true     # collect basic daemon metrics\npost_pool_slots = true      # collect slot metrics\npost_pool_glideins = false  # collect glidein-specific metrics\npost_pool_prio = false      # collect user priorities\npost_pool_jobs = false      # collect job metrics\nuse_gsi_auth = false        # set true if collector requires authentication\nX509_USER_CERT = \"\"         # location of X.509 certificate to authenticate to condor with\nX509_USER_KEY = \"\"          # private key", 
+            "title": "Condor metrics probe"
+        }, 
+        {
+            "location": "/probes/#supervisor", 
+            "text": "Example supervisor config is in  etc/supervisord.conf , it can be used as-is for\nbasic usage. Reuqires some modification to enable crashmails or to report \njob and slot details to elsaticsearch (via logstash).", 
+            "title": "Supervisor"
+        }, 
+        {
+            "location": "/probes/#job-and-slot-state", 
+            "text": "The scripts that collect raw job and slot records into elasticsearch are much simpler than the metrics \nprobe - simply point at your pool with --pool and JSON records are output to stdout. We use logstash \nto pipe the output to Elasticsearch; see  etc/logstash-fifemon.conf .", 
+            "title": "Job and slot state"
+        }, 
+        {
+            "location": "/probes/#running", 
+            "text": "Using uspervisor:  cd $INSTALLDIR/probes\nsource venv/bin/activate  If using influxdb:  export INFLUXDB_USERNAME= username \nexport INFLUXDB_PASSWORD= password   Start supervisor:  supervisord", 
+            "title": "Running"
+        }, 
+        {
+            "location": "/grafana/", 
+            "text": "Fifemon Dashboards\n\n\nGrafana dashboards for displaying HTCondor cluster and job information.\n\n\nExpects data stored in graphite with schema:\n\n\nclusters.\ncluster name\n.\n    collectors.\n        \nName\n.\n            metrics...\n    negotiators.\n        \nName\n.\n            metrics...\n    schedds.\n        \nName\n.\n            metrics...\n    slots.\n        \nSlotType\n.\n            \nState\n.\n                ...\n    jobs.\n        experiments.\n        users.\n        schedds.\n        totals.\n            ...\n\n\n\nSee https://github.com/fifemon/probes for scripts used to collect data.", 
+            "title": "Grafana Dashboards"
+        }, 
+        {
+            "location": "/grafana/#fifemon-dashboards", 
+            "text": "Grafana dashboards for displaying HTCondor cluster and job information.  Expects data stored in graphite with schema:  clusters. cluster name .\n    collectors.\n         Name .\n            metrics...\n    negotiators.\n         Name .\n            metrics...\n    schedds.\n         Name .\n            metrics...\n    slots.\n         SlotType .\n             State .\n                ...\n    jobs.\n        experiments.\n        users.\n        schedds.\n        totals.\n            ...  See https://github.com/fifemon/probes for scripts used to collect data.", 
+            "title": "Fifemon Dashboards"
+        }, 
+        {
+            "location": "/screenshots/", 
+            "text": "Screenshots\n\n\nThese are screenshots of a live Fifemon deployment using the probes and\ndashboards from the \nGitHub repositories\n.\n\n\nNote: user names and other identifiable information have been redacted.\n\n\nCluster Health\n\n\n\n\n\n\nCluster Utilization\n\n\n\n\n\n\nCluster Batch Jobs\n\n\n\n\n\n\nUser Batch Jobs", 
+            "title": "Screenshots"
+        }, 
+        {
+            "location": "/screenshots/#screenshots", 
+            "text": "These are screenshots of a live Fifemon deployment using the probes and\ndashboards from the  GitHub repositories .  Note: user names and other identifiable information have been redacted.", 
+            "title": "Screenshots"
+        }, 
+        {
+            "location": "/screenshots/#cluster-health", 
+            "text": "", 
+            "title": "Cluster Health"
+        }, 
+        {
+            "location": "/screenshots/#cluster-utilization", 
+            "text": "", 
+            "title": "Cluster Utilization"
+        }, 
+        {
+            "location": "/screenshots/#cluster-batch-jobs", 
+            "text": "", 
+            "title": "Cluster Batch Jobs"
+        }, 
+        {
+            "location": "/screenshots/#user-batch-jobs", 
+            "text": "", 
+            "title": "User Batch Jobs"
+        }
+    ]
+}
