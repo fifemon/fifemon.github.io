@@ -1,0 +1,9 @@
+site_name: Fifemon
+copyright: Copyright 2016 Fermi National Accelerator Laboratory (Fermilab)
+repo_url: https://github.com/fifemon
+remote_branch: master
+pages:
+- Home: index.md
+- Probes: probes.md
+- Grafana Dashboards: grafana.md
+- Screenshots: screenshots.md
